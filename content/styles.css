@@ -1,0 +1,589 @@
+/* ═════════════════════════════════════════════
+   EAMS 优化版 v2 — 注入样式
+   使用 CSS 变量，支持统一主题
+   ═════════════════════════════════════════════ */
+
+:root {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+}
+
+/* 重置 */
+.eams-container * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.eams-injected,
+.eams-container {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ═══ 通用布局 ═══ */
+
+.eams-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.eams-header {
+  background: var(--card);
+  padding: 20px 24px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eams-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.eams-header-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eams-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eams-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+/* ═══ 加载 / 错误状态 ═══ */
+
+.eams-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: var(--font);
+  text-align: center;
+}
+
+.eams-loading-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* ═══ 回链 ═══ */
+
+.eams-back-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.eams-back-link:hover {
+  color: var(--primary-hover);
+}
+
+/* ═══ 信息栏 ═══ */
+
+.eams-info-bar {
+  background: var(--card);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ═══ 工具栏 ═══ */
+
+.eams-toolbar {
+  background: var(--card);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.eams-select {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.eams-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ═══ Dashboard 卡片 ═══ */
+
+.eams-core-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eams-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+}
+
+.eams-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.eams-card-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.eams-card-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ═══ 分区 ═══ */
+
+.eams-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.eams-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+/* ═══ 链接网格 ═══ */
+
+.eams-link-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eams-link-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.eams-link-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.eams-link-group {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.eams-link-group-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+/* ═══ 统计卡片 ═══ */
+
+.eams-stat-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.eams-stat-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.eams-stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.eams-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.eams-stat-label {
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* ═══ 表格 ═══ */
+
+.eams-table-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+
+.eams-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.eams-table th {
+  padding: 12px 16px;
+  background: var(--bg);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.eams-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eams-table tbody tr:hover {
+  background: #f1f5f9;
+}
+
+.eams-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.eams-col-center {
+  text-align: center;
+}
+
+.eams-col-left {
+  text-align: left;
+}
+
+.eams-col-muted {
+  color: var(--text-secondary);
+}
+
+.score-high {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.score-medium {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.score-low {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.eams-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px !important;
+}
+
+/* ═══ 考试列表 ═══ */
+
+.eams-card-list {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.eams-exam-item {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.eams-exam-item:last-child {
+  border-bottom: none;
+}
+
+.eams-exam-countdown {
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.eams-exam-cd-num {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.eams-exam-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.eams-exam-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.eams-exam-details {
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.eams-exam-details span {
+  white-space: nowrap;
+}
+
+.eams-empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+  font-size: 15px;
+}
+
+/* ═══ 课表 ═══ */
+
+.eams-schedule-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+
+.eams-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 12px;
+}
+
+.eams-schedule-table th,
+.eams-schedule-table td {
+  border: 1px solid var(--border);
+  padding: 6px;
+}
+
+.eams-period-header {
+  background: #f8fafc;
+  padding: 10px 8px !important;
+  width: 65px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.eams-day-header {
+  background: #DEEDF7;
+  padding: 10px !important;
+  font-weight: 600;
+  min-width: 95px;
+}
+
+.eams-period-cell {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.eams-course-cell {
+  background: #94aef3;
+  color: white;
+  padding: 8px !important;
+  vertical-align: top;
+  text-align: left;
+}
+
+.eams-empty-cell {
+  min-width: 95px;
+}
+
+.eams-course-name {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.eams-course-week,
+.eams-course-room {
+  font-size: 11px;
+  opacity: 0.9;
+  line-height: 1.3;
+}
+
+.eams-course-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 4px 0;
+}
+
+/* ═══ 成绩复选框 ═══ */
+
+.eams-grade-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+/* ═══ 响应式 ═══ */
+
+@media (max-width: 768px) {
+  .eams-core-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .eams-stat-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .eams-container {
+    padding: 12px;
+  }
+
+  .eams-header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .eams-exam-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .eams-exam-details {
+    justify-content: center;
+  }
+
+  .eams-schedule-table {
+    font-size: 11px;
+  }
+
+  .eams-day-header {
+    min-width: 70px;
+    font-size: 11px;
+  }
+}
+
+/* ═══ 模态框 ═══ */
+
+.eams-modal-hidden { display: none; }
+
+.eams-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999999;
+}
+
+.eams-modal-box {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.eams-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eams-modal-header h3 { font-size: 15px; margin: 0; }
+
+.eams-modal-close {
+  cursor: pointer; font-size: 18px; color: var(--text-secondary);
+  padding: 4px 8px; border-radius: 4px;
+}
+.eams-modal-close:hover { background: var(--bg); }
+
+.eams-modal-body { padding: 16px 20px; }
+
+/* ═══ 平时成绩按钮 ═══ */
+
+.eams-usual-btn {
+  cursor: pointer; margin-left: 4px; font-size: 13px;
+  display: inline-block; vertical-align: middle;
+}
+.eams-usual-btn:hover { opacity: 0.7; }
+
+.eams-usual-score { font-weight: 600; }
+
+.eams-usual-info {
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}

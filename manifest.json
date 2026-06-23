@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "uestc-eams-extension",
+  "version": "2.0.0",
+  "description": "电子科技大学教务系统优化版 — 注入优化 UI，重制课表/成绩/考试页面",
+  "author": "Corundum-Ling",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://eams.uestc.edu.cn/*"
+  ],
+  "web_accessible_resources": [{
+    "resources": ["assets/icons/badge.png"],
+    "matches": ["https://eams.uestc.edu.cn/*"]
+  }],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "assets/icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://eams.uestc.edu.cn/*"],
+      "js": ["content/main.js"],
+      "css": ["content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "assets/icons/icon128.png"
+  }
+}
