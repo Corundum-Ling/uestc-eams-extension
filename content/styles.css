@@ -587,3 +587,5 @@ body.eams-injected,
   margin-bottom: 12px; padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
+
+/* @INJECT:STYLES */

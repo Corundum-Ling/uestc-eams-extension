@@ -32,10 +32,33 @@ git clone https://github.com/Corundum-Ling/uestc-eams-extension.git
 
 ## 🎨 自定义
 
-UI 与数据逻辑完全分离。修改外观只需编辑：
+UI 与数据逻辑完全分离。修改外观有三种方式：
 
-- `content/styles.css` — 样式（CSS 变量主题）
+### 方式一：快速注入（推荐）
+
+用 HTML + CSS 文件直接替换页面模板，无需手动编辑 JS：
+
+```bash
+# 1. 在 dev/templates/ 创建 <页面名>.html（写你的页面结构）
+# 2. 创建 <页面名>.json（配置）
+# 3. （可选）创建 <页面名>.css（自定义样式）
+# 4. 运行注入
+node scripts/build-template.js <页面名>
+
+# 示例：替换 Dashboard
+node scripts/build-template.js dashboard
+```
+
+模板支持 `{{fieldName}}`、`{{#each}}`、`{{=JS表达式}}` 等占位符语法。
+
+### 方式二：直接修改
+
 - `content/main.js` → `Templates` 对象 — 页面 HTML 模板
+- `content/styles.css` — 样式（CSS 变量主题）
+
+### 方式三：CSS 变量覆盖
+
+在自定义 CSS 中覆盖 `:root` 变量即可改变全站主题色、圆角、阴影等。
 
 详细说明见 [`UI自定义指南.md`](UI自定义指南.md)。
 

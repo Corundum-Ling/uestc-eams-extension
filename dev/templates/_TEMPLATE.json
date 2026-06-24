@@ -1,0 +1,8 @@
+{
+  "methodName": "announcements",
+  "pageTitle": "通知公告",
+  "backLink": "/eams/home!submenus.action?menu.id=",
+  "urlPattern": "announcement!list",
+  "injectorType": "async",
+  "dataFields": ["announcements", "sid", "sList"]
+}

@@ -1,0 +1,22 @@
+/* ════════════════════════════════════════════
+   _TEMPLATE.css — 模板 CSS 参考文件
+   复制为 <你的模板名>.css，与 .html/.json 同目录
+   运行 node scripts/build-template.js <模板名> 自动注入
+   ════════════════════════════════════════════ */
+
+/* ── 覆盖 CSS 变量（选填） ── */
+:root {
+  --primary: #3b82f6;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --radius: 12px;
+}
+
+/* ── 覆盖容器布局（默认 1200px 居中） ── */
+.eams-container {
+  max-width: 100%;
+  padding: 16px;
+}
+
+/* ── 你的自定义组件样式 ── */

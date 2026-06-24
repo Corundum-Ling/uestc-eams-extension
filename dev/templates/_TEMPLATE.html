@@ -1,0 +1,29 @@
+<!--
+  EAMS Extension HTML 模板 — 占位符语法
+
+  占位符：
+    {{fieldName}}        → ${data.fieldName}  （简单数据插入）
+    {{sListOptions}}     → 学期下拉框 HTML     （自动生成）
+    {{#each arrayName}}
+      ...{{field}}...    → data.arrayName.map(item => `...`).join('')
+    {{/each}}            （循环数组，内部用 {{field}} 引用每项属性）
+
+  示例：通知公告页
+-->
+<div class="eams-toolbar">
+  <select class="eams-select" id="eams-anno-semester">{{sListOptions}}</select>
+</div>
+
+<div class="eams-card-list">
+  {{#each announcements}}
+  <div class="eams-exam-item">
+    <div class="eams-exam-info">
+      <h3>{{title}}</h3>
+      <div class="eams-exam-details">
+        <span>📅 {{date}}</span>
+        <span>📝 {{content}}</span>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>

@@ -1128,6 +1128,8 @@
         </div>
       </div>`;
     },
+
+    /* @INJECT:TEMPLATE */
   };
 
 
@@ -1339,6 +1341,8 @@
       document.getElementById('eams-sched-kind')?.addEventListener('change', submit);
       document.getElementById('eams-sched-week')?.addEventListener('change', submit);
     },
+
+    /* @INJECT:INJECTOR */
   };
 
 
@@ -1358,6 +1362,7 @@
     if (url.includes('teach/grade/usual/usual-grade-std!search')) return 'regular-grades';
     if (url.includes('stdExamTable!examTable')) return 'exams';
     if (url.includes('home.action') || url.includes('homeExt.action') || url.includes('home!submenus')) return 'dashboard';
+    /* @INJECT:DETECT */
     return null;
   }
 
@@ -1394,6 +1399,7 @@
       case 'grades': Injector.grades(); break;
       case 'exams': Injector.exams(); break;
       case 'schedule': Injector.schedule(); break;
+      /* @INJECT:MAIN */
       default:
         console.log('[EAMS优化版] 非目标页面，显示浮动返回按钮');
         // 右下角浮动按钮回到优化版首页
