@@ -19,4 +19,20 @@
   padding: 16px;
 }
 
+/* ── 暗色模式支持 ── */
+/*
+  全局主题切换脚本已内置，模板只需提供一个切换按钮：
+  <button onclick="__toggleEAMSTheme()">🌙</button>
+  data-eams-theme 属性会在 <html> 上切换，全局 CSS 自动响应。
+  如需自定义暗色变量，取消注释并修改：
+*/
+/*
+[data-eams-theme="dark"] {
+  --primary: #60a5fa;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+}
+*/
+
 /* ── 你的自定义组件样式 ── */

@@ -1456,3 +1456,63 @@ node scripts/build-template.js exams
 │  --danger   ─── 红色│
 └─────────────────────┘
 ```
+
+---
+
+## 9. 暗色模式
+
+全局内置，所有页面通用。
+
+### 开关按钮
+
+在任意模板中加一个按钮即可切换暗色/亮色：
+
+```html
+<button class="eams-theme-btn">🌙</button>
+```
+
+不需要 `onclick` 或 `<script>`，内容脚本自动处理。
+
+### 默认界面
+
+成绩/考试/课表/Dashboard 的标题栏右侧自带 🌙 按钮，开箱即用。
+
+### CSS 变量覆盖
+
+暗色模式通过 `[data-eams-theme="dark"]` 覆盖 `:root` 变量实现。所有使用 `var()` 的元素会自动响应。
+
+如需自定义暗色变量，在模板 CSS 中添加：
+
+```css
+[data-eams-theme="dark"] {
+  --primary: #60a5fa;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+}
+```
+
+---
+
+## 10. 模板管理（Popup 导入）
+
+从插件的 Popup 弹窗可以直接管理模板，无需命令行。
+
+操作路径：
+1. 点击插件图标 → 切到「🎨 模板」Tab
+2. 点击「＋ 导入模板」→ 选择文件夹
+3. 导入后自动归类，点击模板名切换，点 ✕ 删除
+4. 切换时自动刷新 EAMS 页面
+
+> 存储驱动：模板按 `.json` 中的 `methodName` 自动归类到对应页面。
+
+---
+
+## 11. Build Script（已废弃）
+
+`scripts/build-template.js` 是旧版构建工具，已由 Popup 导入（§10）替代。
+保留文件未删，但不再推荐使用。需要时可直接运行：
+
+```bash
+node scripts/build-template.js <模板名>
+```

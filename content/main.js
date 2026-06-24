@@ -25,6 +25,32 @@
   const W = { CONTINUOUS: '连', ODD: '单', EVEN: '双' };
 
   // ═══════════════════════════════════════════════════════════
+  //  暗色主题管理器（全局，所有页面通用）
+  // ═══════════════════════════════════════════════════════════
+
+  (function initTheme() {
+    try {
+      if (localStorage.getItem('eams-theme') === 'dark') {
+        document.documentElement.setAttribute('data-eams-theme', 'dark');
+      }
+    } catch { /* localStorage 不可用 */ }
+  })();
+
+  // 暗色切换逻辑（供事件委托和逻辑调用）
+  function toggleEAMSTheme() {
+    const root = document.documentElement;
+    const next = root.getAttribute('data-eams-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-eams-theme', next);
+    try { localStorage.setItem('eams-theme', next); } catch {}
+  }
+
+  // 事件委托：监听 .eams-theme-btn 点击（不需要 onclick 属性）
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.eams-theme-btn');
+    if (btn) toggleEAMSTheme();
+  });
+
+  // ═══════════════════════════════════════════════════════════
   //  调试日志
   // ═══════════════════════════════════════════════════════════
 
@@ -799,6 +825,224 @@
 
 
   // ═══════════════════════════════════════════════════════════
+  //  运行时模板渲染器 —— 从 chrome.storage 加载自定义模板
+  // ═══════════════════════════════════════════════════════════
+
+  const RuntimeRenderer = {
+    STORAGE_KEY: 'eams_opt_templates_v2',
+
+    /** 尝试渲染自定义模板，返回 HTML 或 null */
+    async render(pageType, data) {
+      try {
+        const result = await chrome.storage.local.get(this.STORAGE_KEY);
+        const pages = result[this.STORAGE_KEY] || {};
+        DBG('RENDER', `storage 读取结果: pages=${Object.keys(pages).join(',') || '(空)'}`);
+
+        const pageData = pages[pageType];
+        if (!pageData || !pageData.activeId || !pageData.items) {
+          DBG('RENDER', '→ 无激活的模板'); return null;
+        }
+        const item = pageData.items[pageData.activeId];
+        if (!item || !item.html) { DBG('RENDER', '→ 模板或 HTML 为空'); return null; }
+
+        DBG('RENDER', `HTML ${item.html.length} 字节, CSS ${(item.css||'').length} 字节`);
+        if (item.css) this._injectCSS(pageType, item.css);
+
+        const html = this._render(item.html, data);
+        DBG('RENDER', `→ 渲染完成: ${html.length} 字节`);
+        return html;
+      } catch (e) {
+        DBG('RENDER', `渲染失败: ${e.message}\n${e.stack?.split('\n').slice(0,4).join('\n') || ''}`);
+        return null;
+      }
+    },
+
+    /** 主渲染入口 — 纯字符串处理，无 eval */
+    _render(tpl, data, item) {
+      // 1. {{#each array}}...{{/each}}
+      tpl = tpl.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, arr, inner) => {
+        const items = data[arr];
+        if (!Array.isArray(items)) return '';
+        return items.map(it => this._render(inner, data, it)).join('');
+      });
+
+      // 2. {{sListOptions}}
+      if (tpl.includes('{{sListOptions}}')) {
+        DBG('RENDER', '→ 模板包含 sListOptions');
+        tpl = tpl.replace(/\{\{sListOptions\}\}/g,
+          Templates._semesterOpts(data.sList || [], data.sid));
+      }
+
+      // 3. {{examTypeOptions}}
+      tpl = tpl.replace(/\{\{examTypeOptions\}\}/g,
+        Object.entries(CONFIG.examTypes).map(([k, v]) =>
+          `<option value="${k}"${k === data.etype ? ' selected' : ''}>${v}</option>`
+        ).join(''));
+
+      // 4. {{=expr}} — 表达式求值（无 eval，模式匹配）
+      tpl = tpl.replace(/\{\{=(.*?)\}\}/g, (_, expr) => this._evalExpr(expr.trim(), data, item));
+
+      // 5. {{field}} — 简单字段（优先 item，回退 data）
+      tpl = tpl.replace(/\{\{(\w+)\}\}/g, (_, field) => {
+        const ctx = item || data;
+        const val = ctx[field];
+        return val !== undefined && val !== null ? String(val) : '';
+      });
+
+      return tpl;
+    },
+
+    /** 表达式求值（无 eval，模式匹配常见模式） */
+    _evalExpr(expr, data, item) {
+      const _r = (path, ctx) => {
+        const parts = path.split('.');
+        let v = ctx;
+        for (const p of parts) {
+          if (v == null) return undefined;
+          v = v[p];
+        }
+        return v;
+      };
+
+      // — 工具：替换 data.field / item.field 为实际值
+      const resolveRefs = (s) => {
+        return s.replace(/\b(data|item)\.([\w.]+)/g, (_, pref, path) => {
+          const ctx = pref === 'data' ? data : item;
+          const v = _r(path, ctx);
+          if (typeof v === 'string') return JSON.stringify(v);
+          if (typeof v === 'number') return String(v);
+          return String(v ?? '');
+        });
+      };
+
+      // 模式 A: 纯属性访问 data.x.y 或 item.x.y
+      const simpleProp = expr.match(/^(data|item)\.([\w.]+)$/);
+      if (simpleProp) {
+        const v = _r(simpleProp[2], simpleProp[1] === 'data' ? data : item);
+        return v !== undefined && v !== null ? String(v) : '';
+      }
+
+      // 模式 B: Templates.method(args).prop
+      const tplCall = expr.match(/^Templates\.(\w+)\(([^)]*)\)\.?(\w*)$/);
+      if (tplCall && Templates[tplCall[1]]) {
+        const args = tplCall[2].split(',').map(a => {
+          a = a.trim();
+          const m = a.match(/^(data|item)\.([\w.]+)$/);
+          if (m) return _r(m[2], m[1] === 'data' ? data : item);
+          return a.replace(/^['"]|['"]$/g, '');
+        }).filter(a => a !== '');
+        let result = Templates[tplCall[1]](...args);
+        if (tplCall[3]) result = result[tplCall[3]];
+        return result !== undefined && result !== null ? String(result) : '';
+      }
+
+      // 模式 C: chrome.runtime.getURL('path')
+      const crCall = expr.match(/^chrome\.runtime\.getURL\(['"]([^'"]+)['"]\)$/);
+      if (crCall) return chrome.runtime.getURL(crCall[1]);
+
+      // 模式 D: 字符串拼接 'prefix' + data.field + 'suffix'
+      const concatMatch = expr.match(/^'([^']*)'\s*\+\s*(data|item)\.([\w.]+)\s*\+\s*'([^']*)'$/);
+      if (concatMatch) {
+        const ctx = concatMatch[2] === 'data' ? data : item;
+        const val = _r(concatMatch[3], ctx);
+        return concatMatch[1] + (val ?? '') + concatMatch[4];
+      }
+
+      // 模式 E: 三元表达式 cond ? val1 : val2（包括嵌套）
+      // 用 resolveRefs 替换引用为值，然后纯字符串解析三元
+      try {
+        const resolved = resolveRefs(expr);
+        return this._evalTernary(resolved);
+      } catch (e) {
+        DBG('RENDER', `表达式求值失败: ${expr} → ${e.message}`);
+        return '';
+      }
+    },
+
+    /** 三元表达式求值（纯字符串操作，无 eval） */
+    _evalTernary(resolved) {
+      // 解析简单的三元: condition ? trueVal : falseVal
+      // 支持嵌套: cond1 ? v1 : cond2 ? v2 : v3
+      const trim = s => s.trim();
+
+      // 尝试解析完整三元链
+      const parts = resolved.match(/^(.+?)\s*\?\s*(.+?)\s*:\s*(.+)$/);
+      if (!parts) return resolved.replace(/^['"]|['"]$/g, '');
+
+      const cond = trim(parts[1]);
+      const trueBranch = trim(parts[2]);
+      const falseBranch = trim(parts[3]);
+
+      const condTrue = this._evalCondition(cond);
+      if (condTrue) {
+        // trueBranch 可能有嵌套三元
+        return this._evalTernary(trueBranch).replace(/^['"]|['"]$/g, '');
+      } else {
+        return this._evalTernary(falseBranch).replace(/^['"]|['"]$/g, '');
+      }
+    },
+
+    /** 简单条件求值，支持 >= <= > < === !== */
+    _evalCondition(cond) {
+      const t = s => s.trim();
+
+      // parseFloat(x) >= 90 → 提取两边数字比较
+      const numCmp = cond.match(/([\d.]+)\s*(>=|<=|>|<|===?|!==?)\s*([\d.]+)/);
+      if (numCmp) {
+        const a = parseFloat(numCmp[1]), b = parseFloat(numCmp[3]);
+        if (!isNaN(a) && !isNaN(b)) {
+          switch (numCmp[2]) {
+            case '>=': return a >= b;
+            case '<=': return a <= b;
+            case '>':  return a > b;
+            case '<':  return a < b;
+            case '==': case '===': return a === b;
+            case '!=': case '!==': return a !== b;
+          }
+        }
+      }
+
+      // 字符串比较: "x" === 'y'（兼容双引号和单引号）
+      const strCmp = cond.match(/['"]([^'"]*)['"]\s*(===?|!==?)\s*['"]([^'"]*)['"]/);
+      if (strCmp) {
+        const eq = strCmp[2].startsWith('=');
+        return eq ? strCmp[1] === strCmp[3] : strCmp[1] !== strCmp[3];
+      }
+
+      // 真值判断: 提取条件中的数字, parseFloat("88") → 88 → truthy
+      const numVal = cond.match(/([\d.]+)/);
+      if (numVal) {
+        const n = parseFloat(numVal[1]);
+        return !isNaN(n) && n !== 0;
+      }
+
+      // 空/undefined → falsy
+      return false;
+    },
+
+    /** CSS 注入（每个页面只注入一次） */
+    _injectCSS(pageType, css) {
+      const id = 'eams-tpl-css-' + pageType;
+      if (document.getElementById(id)) return;
+      const style = document.createElement('style');
+      style.id = id;
+      style.textContent = css;
+      document.head.appendChild(style);
+    },
+
+    /** 执行模板 HTML 中的 <script> 标签（innerHTML 不会自动执行） */
+    execScripts(container) {
+      if (!container) return;
+      container.querySelectorAll('script').forEach(old => {
+        const s = document.createElement('script');
+        if (old.src) s.src = old.src;
+        else s.textContent = old.textContent;
+        old.replaceWith(s);
+      });
+    },
+  };
+
+  // ═══════════════════════════════════════════════════════════
   //  UI 模板 —— 用模板字符串渲染页面
   // ═══════════════════════════════════════════════════════════
 
@@ -818,7 +1062,10 @@
       const header = title
         ? `<div class="eams-header">
             <h1>${title}</h1>
-            ${backLink ? `<a href="${backLink}" class="eams-back-link">← 返回主页</a>` : ''}
+            <div class="eams-header-actions">
+              ${backLink ? `<a href="${backLink}" class="eams-back-link">← 返回主页</a>` : ''}
+              <button class="eams-theme-btn" title="切换暗色模式">🌙</button>
+            </div>
            </div>`
         : '';
       return `<div class="eams-container">${header}${content}</div>`;
@@ -889,7 +1136,10 @@
               <p style="font-size:13px;color:var(--text-secondary);margin:2px 0 0">本科教学管理系统</p>
             </div>
           </div>
-          <a href="/eams/home!index.action" class="eams-back-link">返回原版 →</a>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="eams-theme-btn" title="切换暗色模式">🌙</button>
+            <a href="/eams/home!index.action" class="eams-back-link">返回原版 →</a>
+          </div>
         </div>
         <div class="eams-info-bar"><span>当前学期：${semesterName}</span></div>
         <div class="eams-core-grid">
@@ -1014,12 +1264,12 @@
         }
       }
 
-      // 生成节次背景色（原版配色）
-      const periodBg = (p) => p < 4 ? '#EEFF00' : p < 8 ? '#33BB00' : 'pink';
+      // 生成节次背景色
+      const periodCls = (p) => p < 4 ? 'eams-period-am' : p < 8 ? 'eams-period-pm' : 'eams-period-night';
 
       let rows = '';
       for (let p = 0; p < 12; p++) {
-        rows += `<tr><td class="eams-period-cell" style="background:${periodBg(p)}">第${p + 1}节</td>`;
+        rows += `<tr><td class="eams-period-cell ${periodCls(p)}">第${p + 1}节</td>`;
         for (let d = 0; d < 7; d++) {
           const key = `${d}_${p}`;
           if (skip[key]) continue;
@@ -1139,16 +1389,21 @@
 
   const Injector = {
     /** Dashboard — 使用 Overlay 覆盖，保留原页面脚本和表单 */
-    dashboard() {
+    async dashboard() {
       const sid = Semester.getId();
       DBG('DASH', 'Dashboard overlay 注入');
+
+      const data = { semesterName: Semester.getLabel(sid), currentSid: sid };
+      const customHTML = await RuntimeRenderer.render('dashboard', data);
+      const content = customHTML || Templates.dashboard(data.semesterName, data.currentSid);
 
       // 创建 overlay 容器覆盖原页面（不替换 body）
       const overlay = document.createElement('div');
       overlay.id = 'eams-opt-overlay';
-      overlay.innerHTML = Templates.dashboard(Semester.getLabel(sid), sid);
-      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;overflow:auto;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif';
+      overlay.innerHTML = content;
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;overflow:auto;background:var(--bg,#f8fafc);font-family:-apple-system,BlinkMacSystemFont,sans-serif';
       document.body.appendChild(overlay);
+      if (customHTML) RuntimeRenderer.execScripts(overlay);  // 执行模板内的 <script>
 
       // 隐藏原页面内容（但保留 DOM）
       for (const el of document.body.children) {
@@ -1174,8 +1429,12 @@
         const grades = await DataFetcher.grades(sid);
         const gpa = GPA.calc(grades);
         const wavg = GPA.weightedAvg(grades);
-        const html = Templates.grades({ grades, gpa, wavg, sid, sList });
+        const data = { grades, gpa, wavg, sid, sList };
+        const customHTML = await RuntimeRenderer.render('grades', data);
+        const html = customHTML || Templates.grades(data);
         document.body.innerHTML = html;
+        document.body.className = 'eams-injected';
+        if (customHTML) RuntimeRenderer.execScripts(document.body);
         Injector._bindGradeCheckboxes(grades);
         document.getElementById('eams-semester-select')?.addEventListener('change', function () {
           window.location.href = `/eams/teach/grade/course/person!search.action?semesterId=${this.value}&projectType=`;
@@ -1195,8 +1454,12 @@
 
       try {
         const exams = await DataFetcher.exams(sid, etype);
-        const html = Templates.exams({ exams, sid, etype, sList });
+        const data = { exams, sid, etype, sList };
+        const customHTML = await RuntimeRenderer.render('exams', data);
+        const html = customHTML || Templates.exams(data);
         document.body.innerHTML = html;
+        document.body.className = 'eams-injected';
+        if (customHTML) RuntimeRenderer.execScripts(document.body);
         Injector._bindExamSelectors();
       } catch (e) {
         document.body.innerHTML = Templates.error(`考试加载失败：${e.message}`);
@@ -1222,8 +1485,12 @@
 
       // 渲染（即使 0 个格子也渲染空课表）
       try {
-        const html = Templates.schedule({ cells, sid: state.sid, kind: state.kind, week: state.week, sList });
+        const data = { cells, sid: state.sid, kind: state.kind, week: state.week, sList };
+        const customHTML = await RuntimeRenderer.render('schedule', data);
+        const html = customHTML || Templates.schedule(data);
         document.body.innerHTML = html;
+        document.body.className = 'eams-injected';
+        if (customHTML) RuntimeRenderer.execScripts(document.body);
         Injector._bindScheduleSelectors();
         DBG('INJECT', '课表注入完成');
       } catch (e) {
@@ -1345,6 +1612,18 @@
     /* @INJECT:INJECTOR */
   };
 
+
+  // ═══════════════════════════════════════════════════════════
+  //  消息监听 —— 来自 Popup 的模板切换通知
+  // ═══════════════════════════════════════════════════════════
+
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === 'eams-template-changed') {
+      DBG('RENDER', '模板已切换，刷新页面');
+      sendResponse({ ok: true });
+      window.location.reload();
+    }
+  });
 
   // ═══════════════════════════════════════════════════════════
   //  页面检测 & 入口

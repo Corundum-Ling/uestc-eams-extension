@@ -12,28 +12,58 @@
       --text: #1e293b;
       --text-secondary: #64748b;
       --border: #e2e8f0;
+      --success: #22c55e;
+      --danger: #ef4444;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
       background: var(--bg);
       color: var(--text);
-      width: 280px;
-      padding: 16px;
+      width: 300px;
+      min-height: 200px;
     }
+
+    /* ═══ Tab 栏 ═══ */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ═══ 页面容器 ═══ */
+    .page { display: none; padding: 12px; }
+    .page.active { display: block; }
+
+    /* ═══ 导航页 ═══ */
     .header {
       text-align: center;
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
     }
-    .header h1 { font-size: 15px; color: var(--primary); }
-    .header p { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+    .header h1 { font-size: 14px; color: var(--primary); }
+    .header p { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
 
-    .menu { display: flex; flex-direction: column; gap: 6px; }
+    .menu { display: flex; flex-direction: column; gap: 4px; }
     .menu-item {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px;
+      padding: 8px 12px;
       background: var(--card);
       border-radius: 8px;
       text-decoration: none;
@@ -43,47 +73,241 @@
       cursor: pointer;
     }
     .menu-item:hover { border-color: var(--primary); }
-    .menu-item .icon { font-size: 18px; }
+    .menu-item .icon { font-size: 16px; }
     .menu-item .title { font-size: 13px; font-weight: 500; }
     .menu-item .desc { font-size: 11px; color: var(--text-secondary); }
 
     .footer {
-      margin-top: 12px;
-      padding-top: 10px;
+      margin-top: 10px;
+      padding-top: 8px;
       border-top: 1px solid var(--border);
       text-align: center;
     }
     .footer a { color: var(--primary); text-decoration: none; font-size: 11px; }
+
+    /* ═══ 模板管理页 ═══ */
+    .tpl-page-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .tpl-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .tpl-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .tpl-row .tpl-icon { font-size: 15px; }
+    .tpl-row .tpl-name { flex: 1; }
+    .tpl-row .tpl-status {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .tpl-row .tpl-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .tpl-row .tpl-dot.active { background: var(--success); }
+    .tpl-row .tpl-toggle {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .tpl-row .tpl-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .tpl-row .tpl-del {
+      font-size: 11px;
+      padding: 2px 6px;
+      border: none;
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+      opacity: 0.5;
+    }
+    .tpl-row .tpl-del:hover { opacity: 1; }
+
+    .tpl-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .tpl-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .tpl-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .tpl-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+    .tpl-btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .tpl-btn.primary:hover { opacity: 0.9; }
+
+    .tpl-group {
+      margin-bottom: 12px;
+    }
+    .tpl-group-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tpl-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.1s;
+      margin-bottom: 2px;
+    }
+    .tpl-option:hover { background: var(--border); }
+    .tpl-option.active { background: rgba(59, 130, 246, 0.08); font-weight: 500; }
+    .tpl-option .radio {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tpl-option.active .radio { border-color: var(--primary); }
+    .tpl-option.active .radio::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .tpl-option .tpl-opt-name {
+      flex: 1;
+      color: var(--text);
+    }
+    .tpl-option .tpl-opt-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      background: var(--bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .tpl-option .tpl-opt-del {
+      font-size: 11px;
+      padding: 2px 6px;
+      border: none;
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+      opacity: 0.3;
+    }
+    .tpl-option .tpl-opt-del:hover { opacity: 1; }
+    .tpl-opt-import {
+      display: block;
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .tpl-opt-import:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .tpl-empty {
+      text-align: center;
+      padding: 24px 0;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>📚 EAMS 优化版</h1>
-    <p id="status">检测中...</p>
+  <!-- Tab 栏 -->
+  <div class="tabs">
+    <button class="tab active" data-tab="nav">📋 导航</button>
+    <button class="tab" data-tab="tpl">🎨 模板</button>
   </div>
 
-  <div class="menu">
-    <a href="#" class="menu-item" data-page="dashboard">
-      <span class="icon">🏠</span>
-      <div><div class="title">打开主页</div><div class="desc">课表、成绩、考试入口</div></div>
-    </a>
-    <a href="#" class="menu-item" data-page="schedule">
-      <span class="icon">📅</span>
-      <div><div class="title">我的课表</div><div class="desc">查看本周课程安排</div></div>
-    </a>
-    <a href="#" class="menu-item" data-page="grades">
-      <span class="icon">📊</span>
-      <div><div class="title">我的成绩</div><div class="desc">查看成绩和 GPA</div></div>
-    </a>
-    <a href="#" class="menu-item" data-page="exams">
-      <span class="icon">📋</span>
-      <div><div class="title">我的考试</div><div class="desc">查看考试安排</div></div>
-    </a>
+  <!-- ═══ 页1: 导航 ═══ -->
+  <div id="page-nav" class="page active">
+    <div class="header">
+      <h1>📚 EAMS 优化版</h1>
+      <p id="status">检测中...</p>
+    </div>
+
+    <div class="menu">
+      <a href="#" class="menu-item" data-page="dashboard">
+        <span class="icon">🏠</span>
+        <div><div class="title">打开主页</div><div class="desc">课表、成绩、考试入口</div></div>
+      </a>
+      <a href="#" class="menu-item" data-page="schedule">
+        <span class="icon">📅</span>
+        <div><div class="title">我的课表</div><div class="desc">查看本周课程安排</div></div>
+      </a>
+      <a href="#" class="menu-item" data-page="grades">
+        <span class="icon">📊</span>
+        <div><div class="title">我的成绩</div><div class="desc">查看成绩和 GPA</div></div>
+      </a>
+      <a href="#" class="menu-item" data-page="exams">
+        <span class="icon">📋</span>
+        <div><div class="title">我的考试</div><div class="desc">查看考试安排</div></div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <a href="https://eams.uestc.edu.cn/eams/home!submenus.action?menu.id=" target="_blank">访问原 EAMS 系统 →</a>
+    </div>
   </div>
 
-  <div class="footer">
-    <a href="https://eams.uestc.edu.cn/eams/home!submenus.action?menu.id=" target="_blank">访问原 EAMS 系统 →</a>
+  <!-- ═══ 页2: 模板管理 ═══ -->
+  <div id="page-tpl" class="page">
+    <div class="tpl-page-title">🎨 模板管理</div>
+    <div class="tpl-list" id="tpl-list"></div>
+    <div class="tpl-actions">
+      <button class="tpl-btn primary" id="tpl-import">＋ 导入模板</button>
+      <button class="tpl-btn danger" id="tpl-reset">全部恢复默认</button>
+    </div>
   </div>
+
+  <!-- 隐藏的文件选择器 -->
+  <input type="file" id="file-picker" webkitdirectory style="display:none">
 
   <script src="popup.js"></script>
 </body>

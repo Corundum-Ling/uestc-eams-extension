@@ -8,9 +8,16 @@
       ...{{field}}...    → data.arrayName.map(item => `...`).join('')
     {{/each}}            （循环数组，内部用 {{field}} 引用每项属性）
 
+  暗色模式（全局内置，无需额外 JS）：
+    模板中加一个按钮：
+      <button class="eams-theme-btn">🌙</button>
+    点击后自动切换全局暗色/亮色，所有页面联动。
+    CSS 变量由内容脚本自动管理。无需 onclick 或 script。
+
   示例：通知公告页
 -->
 <div class="eams-toolbar">
+  <button class="eams-theme-btn" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);cursor:pointer">🌙</button>
   <select class="eams-select" id="eams-anno-semester">{{sListOptions}}</select>
 </div>
 

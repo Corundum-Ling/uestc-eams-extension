@@ -109,6 +109,28 @@ body.eams-injected,
   color: var(--primary-hover);
 }
 
+.eams-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eams-theme-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.eams-theme-btn:hover {
+  border-color: var(--primary);
+}
+
 /* ═══ 信息栏 ═══ */
 
 .eams-info-bar {
@@ -586,6 +608,109 @@ body.eams-injected,
   font-size: 13px; color: var(--text-secondary);
   margin-bottom: 12px; padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
+}
+
+/* ═══ 暗色模式（全局） ═══ */
+
+[data-eams-theme="dark"] {
+  --primary: #60a5fa;
+  --primary-hover: #93c5fd;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-eams-theme="dark"] body,
+[data-eams-theme="dark"] body.eams-injected {
+  background: var(--bg);
+}
+
+[data-eams-theme="dark"] .eams-loading {
+  color: var(--text);
+}
+
+/* ═══ 课表节次背景色 ═══ */
+
+.eams-period-am {
+  background: #EEFF00;
+  color: #333;
+}
+
+.eams-period-pm {
+  background: #33BB00;
+  color: #fff;
+}
+
+.eams-period-night {
+  background: pink;
+  color: #333;
+}
+
+[data-eams-theme="dark"] .eams-period-am {
+  background: #2d5a2d;
+  color: #a0e0a0;
+}
+
+[data-eams-theme="dark"] .eams-period-pm {
+  background: #1a3a5a;
+  color: #90c0e0;
+}
+
+[data-eams-theme="dark"] .eams-period-night {
+  background: #4a2a5a;
+  color: #d0a0e0;
+}
+
+[data-eams-theme="dark"] .eams-course-name {
+  color: var(--text);
+}
+
+[data-eams-theme="dark"] .eams-course-week,
+[data-eams-theme="dark"] .eams-course-room {
+  color: var(--text-secondary);
+}
+
+[data-eams-theme="dark"] .eams-period-header {
+  background: #1b2638;
+  color: #8899b0;
+  border-color: #334155;
+}
+
+[data-eams-theme="dark"] .eams-day-header {
+  background: #253045;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+[data-eams-theme="dark"] .eams-course-cell {
+  background: #1e293b;
+  color: var(--text);
+  border-color: #334155;
+}
+
+[data-eams-theme="dark"] .eams-empty-cell {
+  background: #162032 !important;
+  border-color: #334155;
+}
+
+[data-eams-theme="dark"] .eams-schedule-table td,
+[data-eams-theme="dark"] .eams-schedule-table th {
+  border-color: #334155;
+}
+
+[data-eams-theme="dark"] .eams-empty-cell {
+  background: transparent;
+}
+
+[data-eams-theme="dark"] .eams-table tbody tr:hover {
+  background: #1a2538;
 }
 
 /* @INJECT:STYLES */

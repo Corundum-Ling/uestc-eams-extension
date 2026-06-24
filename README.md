@@ -14,6 +14,8 @@ UI 支持高度自定义
 - **课表页** — 学生/班级课表切换 · 7×12 网格 · rowspan 合并 · 周次选择
 - **考试页** — 学期/考试类型切换 · 倒计时显示
 - **Dashboard** — 核心入口 + 26 项原系统功能链接（按分类组织）
+- **暗色模式** — 全局内置，所有页面通用，支持模板自定义颜色
+- **模板管理** — Popup 弹窗直接导入/切换/删除模板，无需命令行
 
 ## 🖼️ 示例页面截图
 
@@ -34,31 +36,30 @@ git clone https://github.com/Corundum-Ling/uestc-eams-extension.git
 
 UI 与数据逻辑完全分离。修改外观有三种方式：
 
-### 方式一：快速注入（推荐）
+### 方式一：Popup 导入（推荐）
 
-用 HTML + CSS 文件直接替换页面模板，无需手动编辑 JS：
+从插件弹窗直接导入模板，无需命令行：
+
+1. 点击插件图标 → 切到「🎨 模板」Tab
+2. 点击「＋ 导入模板」→ 选择文件夹
+3. 导入后自动归类，点击切换，支持多模板管理
+
+### 方式二：Build Script（旧版）
+
+在 `dev/templates/` 创建 HTML/CSS/JSON 文件后运行：
 
 ```bash
-# 1. 在 dev/templates/ 创建 <页面名>.html（写你的页面结构）
-# 2. 创建 <页面名>.json（配置）
-# 3. （可选）创建 <页面名>.css（自定义样式）
-# 4. 运行注入
-node scripts/build-template.js <页面名>
-
-# 示例：替换 Dashboard
-node scripts/build-template.js dashboard
+node scripts/build-template.js <模板名>
 ```
 
-模板支持 `{{fieldName}}`、`{{#each}}`、`{{=JS表达式}}` 等占位符语法。
-
-### 方式二：直接修改
+### 方式三：直接修改
 
 - `content/main.js` → `Templates` 对象 — 页面 HTML 模板
 - `content/styles.css` — 样式（CSS 变量主题）
 
-### 方式三：CSS 变量覆盖
+### 暗色模式
 
-在自定义 CSS 中覆盖 `:root` 变量即可改变全站主题色、圆角、阴影等。
+内置全局暗色模式。所有页面标题栏右侧有 🌙 按钮，自定义模板中加 `<button class="eams-theme-btn">🌙</button>` 即可。
 
 详细说明见 [`UI自定义指南.md`](UI自定义指南.md)。
 
