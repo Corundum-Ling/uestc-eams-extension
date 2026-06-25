@@ -1724,6 +1724,8 @@
       /* @INJECT:MAIN */
       default:
         console.log('[EAMS优化版] 非目标页面，显示浮动返回按钮');
+        // 原版 EAMS 页面无暗色适配，撤销主题避免内容不可读
+        document.documentElement.removeAttribute('data-eams-theme');
         const backBtn = document.createElement('a');
         backBtn.href = '/eams/home!submenus.action?menu.id=';
         backBtn.textContent = '📚 返回优化版';
