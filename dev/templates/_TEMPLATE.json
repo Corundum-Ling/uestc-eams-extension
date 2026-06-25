@@ -6,3 +6,14 @@
   "injectorType": "async",
   "dataFields": ["announcements", "sid", "sList"]
 }
+{
+  "methodName": "_loading",
+  "pageTitle": "加载动画",
+  "description": "页面切换时显示的加载过渡动画。未自定义时使用默认 spinner。",
+  "urlPattern": "（非页面类型，无 URL 匹配）",
+  "injectorType": "none",
+  "dataFields": ["isDark"],
+  "dataFieldsDesc": {
+    "isDark": "boolean — 当前是否为暗色模式"
+  }
+}

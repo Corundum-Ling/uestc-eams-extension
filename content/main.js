@@ -34,10 +34,11 @@
   function showLoadingOverlay() {
     const div = document.createElement('div');
     div.id = 'eams-loading-overlay';
-    div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">⏳</div><div style="font-size:16px">加载中...</div></div></div>';
-    document.body.appendChild(div);
+    div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000000;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif';
     const isDark = document.documentElement.getAttribute('data-eams-theme') === 'dark';
     div.style.background = isDark ? '#1a1a2e' : '#f8fafc';
+    div.innerHTML = '<div class="eams-loading"><div class="eams-spinner"></div><div style="margin-top:16px;font-size:16px;color:var(--text-secondary,#64748b)">加载中...</div></div>';
+    document.body.appendChild(div);
   }
 
   /** 移除隐藏样式 + 加载过渡，露出优化界面 */
@@ -1420,9 +1421,33 @@
       </div>`;
     },
 
+    /** 加载动画（页面切换时显示），默认 spinner；用户可自定义 */
+    _loading() {
+      return '<div class="eams-loading"><div class="eams-spinner"></div><div style="margin-top:16px;font-size:16px;color:var(--text-secondary,#64748b)">加载中...</div></div>';
+    },
+
     /* @INJECT:TEMPLATE */
   };
 
+
+  // ═══════════════════════════════════════════════════════════
+  //  加载动画升级 —— 尝试用自定义模板替换默认 spinner
+  // ═══════════════════════════════════════════════════════════
+
+  /** 在 RuntimeRenderer 就绪后，尝试用自定义 _loading 模板升级 overlay */
+  async function upgradeLoadingOverlay() {
+    try {
+      const isDark = document.documentElement.getAttribute('data-eams-theme') === 'dark';
+      const customHTML = await RuntimeRenderer.render('_loading', { isDark });
+      if (!customHTML) return;
+      const overlay = document.getElementById('eams-loading-overlay');
+      if (!overlay) return;
+      overlay.innerHTML = customHTML;
+      RuntimeRenderer.execScripts(overlay);
+    } catch (e) {
+      DBG('RENDER', `升级加载动画失败: ${e.message}`);
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════
   //  页面注入器 —— 每个页面一个 inject 函数
@@ -1464,8 +1489,6 @@
     async grades() {
       const sid = Semester.getId();
       const sList = Semester.getList();
-      this._showLoading('📊', '加载中...');
-
       try {
         const grades = await DataFetcher.grades(sid);
         const gpa = GPA.calc(grades);
@@ -1491,8 +1514,6 @@
       const sList = Semester.getList();
       const urlP = new URLSearchParams(window.location.search);
       const etype = urlP.get('examType.id') || '1';
-      this._showLoading('📋', '加载中...');
-
       try {
         const exams = await DataFetcher.exams(sid, etype);
         const data = { exams, sid, etype, sList };
@@ -1537,11 +1558,6 @@
       } catch (e) {
         DBG('INJECT', `❌ 渲染失败: ${e.message}`);
       }
-    },
-
-    /** 展示加载状态 */
-    _showLoading(emoji, text) {
-      document.body.innerHTML = Templates.loading(emoji, text);
     },
 
     /** 成绩页面：复选框重新计算 GPA */
@@ -1712,6 +1728,7 @@
   async function main() {
     await whenBodyReady();
     showLoadingOverlay();
+    await upgradeLoadingOverlay();
     captureIdsGlobally();
     const page = detectPage();
     console.log('[EAMS优化版] 检测到页面:', page);
