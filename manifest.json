@@ -23,7 +23,7 @@
       "matches": ["https://eams.uestc.edu.cn/*"],
       "js": ["content/main.js"],
       "css": ["content/styles.css"],
-      "run_at": "document_idle"
+      "run_at": "document_start"
     }
   ],
   "icons": {

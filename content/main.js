@@ -8,6 +8,47 @@
   'use strict';
 
   // ═══════════════════════════════════════════════════════════
+  //  白闪修复 —— document_start 立即隐藏，避免原页面可见
+  // ═══════════════════════════════════════════════════════════
+
+  const HIDE_STYLE_ID = 'eams-startup-hide';
+  (function hideImmediately() {
+    const s = document.createElement('style');
+    s.id = HIDE_STYLE_ID;
+    s.textContent = 'html{visibility:hidden!important}';
+    document.documentElement.appendChild(s);
+  })();
+
+  /** 等待 document.body 就绪（document_start 时 body 为 null） */
+  function whenBodyReady() {
+    return new Promise(resolve => {
+      if (document.body && document.body.isConnected) { resolve(); return; }
+      const mo = new MutationObserver(() => {
+        if (document.body && document.body.isConnected) { mo.disconnect(); resolve(); }
+      });
+      mo.observe(document.documentElement, { childList: true, subtree: true });
+    });
+  }
+
+  /** 展示加载过渡界面，遮挡原页面构建过程 */
+  function showLoadingOverlay() {
+    const div = document.createElement('div');
+    div.id = 'eams-loading-overlay';
+    div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">⏳</div><div style="font-size:16px">加载中...</div></div></div>';
+    document.body.appendChild(div);
+    const isDark = document.documentElement.getAttribute('data-eams-theme') === 'dark';
+    div.style.background = isDark ? '#1a1a2e' : '#f8fafc';
+  }
+
+  /** 移除隐藏样式 + 加载过渡，露出优化界面 */
+  function revealPage() {
+    const overlay = document.getElementById('eams-loading-overlay');
+    if (overlay) overlay.remove();
+    const hideStyle = document.getElementById(HIDE_STYLE_ID);
+    if (hideStyle) hideStyle.remove();
+  }
+
+  // ═══════════════════════════════════════════════════════════
   //  配置常量
   // ═══════════════════════════════════════════════════════════
 
@@ -1668,32 +1709,30 @@
     }
   }
 
-  function main() {
+  async function main() {
+    await whenBodyReady();
+    showLoadingOverlay();
     captureIdsGlobally();
     const page = detectPage();
     console.log('[EAMS优化版] 检测到页面:', page);
 
     switch (page) {
-      case 'dashboard': Injector.dashboard(); break;
-      case 'grades': Injector.grades(); break;
-      case 'exams': Injector.exams(); break;
-      case 'schedule': Injector.schedule(); break;
+      case 'dashboard': await Injector.dashboard(); break;
+      case 'grades': await Injector.grades(); break;
+      case 'exams': await Injector.exams(); break;
+      case 'schedule': await Injector.schedule(); break;
       /* @INJECT:MAIN */
       default:
         console.log('[EAMS优化版] 非目标页面，显示浮动返回按钮');
-        // 右下角浮动按钮回到优化版首页
         const backBtn = document.createElement('a');
         backBtn.href = '/eams/home!submenus.action?menu.id=';
         backBtn.textContent = '📚 返回优化版';
         backBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;background:#3b82f6;color:white;padding:12px 20px;border-radius:8px;text-decoration:none;font:14px sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
         document.body.appendChild(backBtn);
     }
+    revealPage();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', main);
-  } else {
-    main();
-  }
+  main();
 
 })();
